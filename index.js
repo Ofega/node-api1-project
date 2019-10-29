@@ -6,23 +6,13 @@ const server = express();
 server.use(express.json());
 server.use(cors());
 
-server.post('/api/users', createNewUser);
+
 server.get('/api/users', getAllUsers);
 server.get('/api/users/:id', getUserById);
+server.post('/api/users', createNewUser);
+server.put('/api/users/:id', updateUserById);
+server.delete('/api/users/:id', deleteUserById);
 
-function createNewUser(req, res) {
-    const user = {
-        "name": req.body.name,
-    }
-
-    db.insert(user)
-        .then(data => {
-            res.status(200).json(data);
-        })
-        .catch(error => {
-            res.json(error)
-        })
-}
 
 function getAllUsers(req, res) {
     db.find()
@@ -30,18 +20,98 @@ function getAllUsers(req, res) {
             res.status(200).json(data);
         })
         .catch(error => {
-            res.json(error)
+            res
+            .status(500)
+            .json({error: "The users information could not be retrieved." });
         })
 }
 
 function getUserById(req, res) {
     const { id } = req.params;
+
     db.findById(id)
         .then(data => {
-            res.status(200).json(data);
+            if (data) {
+                res.status(200).json(data);
+            } else {
+            res
+                .status(404)
+                .json({ error: 'The user with the specified ID does not exist.' });
+            }
         })
         .catch(error => {
-            res.json(error)
+            res
+            .status(500)
+            .json({error: "The user information could not be retrieved." });
+        })
+}
+
+function createNewUser(req, res) {
+    const { name, bio } = req.body;
+
+    if (!name || !bio) {
+        res
+        .status(400)
+        .json({ error: 'Please provide name and bio for the user.' });
+    } else {
+        db.insert(req.body)
+            .then(data => {
+                res.status(201).json(data);
+            })
+            .catch(() => {
+                res
+                .status(500)
+                .json({error: 'There was an error while saving the user to the database'});
+            });
+    }
+}
+
+function updateUserById(req, res) {
+    const { id } = req.params;
+    const { name, bio } = req.body;
+
+    if (!name || !bio) {
+        res
+        .status(400)
+        .json({ error: 'Please provide name and bio for the user.' });
+    } else {
+        db.update(id, req.body)
+            .then(data => {
+                if(data) {
+                    res.status(200).json(data);
+                } else {
+                    res
+                    .status(404)
+                    .json({ error: 'The user with the specified ID does not exist.'});
+                }
+            })
+            .catch((err) => {
+                res
+                .status(500)
+                .json({error: 'The user information could not be modified.'});
+            });
+    }
+}
+
+function deleteUserById(req, res) {
+    const { id } = req.params;
+
+    db.remove(id)
+        .then(data => {
+            if (data && data > 0) {
+                res.status(200).json({
+                    error: 'the user was deleted.',
+                });
+            } else {
+                res
+                .status(404)
+                .json({ error: 'The user with the specified ID does not exist.' });
+            }
+        })
+        .catch(error => {
+            res
+            .status(500)
+            .json({error: "The user could not be removed" });
         })
 }
 
