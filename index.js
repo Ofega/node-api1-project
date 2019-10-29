@@ -98,23 +98,24 @@ function updateUserById(req, res) {
 
 function deleteUserById(req, res) {
     const { id } = req.params;
-    const deletedUser = db.findById(id).then(data => data)
 
-    db.remove(id)
-        .then(data => {
-            if (data && data > 0) {
-                res.status(200).json(deletedUser);
-            } else {
-                res
-                .status(404)
-                .json({ error: 'The user with the specified ID does not exist.' });
-            }
+    db.findById(id)
+        .then(user => {
+            db.remove(id)
+                .then(data => {
+                    res.status(200).json(user);
+                })
+                .catch(error => {
+                    res
+                    .status(500)
+                    .json({error: "The user could not be removed" });
+                })
         })
-        .catch(error => {
+        .catch(err => {
             res
-            .status(500)
-            .json({error: "The user could not be removed" });
-        })
+            .status(404)
+            .json({ error: 'The user with the specified ID does not exist.' });
+        })  
 }
 
 server.listen(process.env.PORT || 5000, () => {
