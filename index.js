@@ -101,20 +101,26 @@ function deleteUserById(req, res) {
 
     db.findById(id)
         .then(user => {
-            db.remove(id)
-                .then(data => {
-                    res.status(200).json(user);
-                })
-                .catch(error => {
-                    res
-                    .status(500)
-                    .json({error: "The user could not be removed" });
-                })
+            if (user) {
+                db.remove(id)
+                    .then(data => {
+                        res.status(200).json(user);
+                    })
+                    .catch(error => {
+                        res
+                        .status(500)
+                        .json({error: "The user could not be removed" });
+                    })
+            } else {
+            res
+                .status(404)
+                .json({ error: 'The user with the specified ID does not exist.' });
+            }
         })
         .catch(err => {
             res
             .status(404)
-            .json({ error: 'The user with the specified ID does not exist.' });
+            .json({error: "The user information could not be retrieved." });
         })  
 }
 
