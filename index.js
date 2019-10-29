@@ -7,7 +7,7 @@ server.use(express.json());
 server.use(cors());
 
 server.get('/api/users', getAllUsers);
-server.get('/api/users/:id', getAUser);
+server.get('/api/users/:id', getUserById);
 
 function getAllUsers(req, res) {
     db.find()
@@ -19,8 +19,9 @@ function getAllUsers(req, res) {
         })
 }
 
-function getAUser(req, res) {
-    db.find()
+function getUserById(req, res) {
+    const { id } = req.params;
+    db.findById(id)
         .then(data => {
             res.json(data);
         })
@@ -29,6 +30,6 @@ function getAUser(req, res) {
         })
 }
 
-server.listen(process.env.PORT || 3000, () => {
-    console.log('server listening on port ' + (process.env.PORT || 3000))
+server.listen(process.env.PORT || 5000, () => {
+    console.log('server listening on port ' + (process.env.PORT || 5000))
 })
