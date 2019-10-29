@@ -78,14 +78,17 @@ function updateUserById(req, res) {
         db.update(id, req.body)
             .then(data => {
                 if(data) {
-                    res.status(200).json(data);
+                    db.findById(id)
+                        .then(data => {
+                            res.status(200).json(data);
+                        })
                 } else {
                     res
                     .status(404)
                     .json({ error: 'The user with the specified ID does not exist.'});
                 }
             })
-            .catch((err) => {
+            .catch(() => {
                 res
                 .status(500)
                 .json({error: 'The user information could not be modified.'});
@@ -95,13 +98,12 @@ function updateUserById(req, res) {
 
 function deleteUserById(req, res) {
     const { id } = req.params;
+    const deletedUser = db.findById(id).then(data => data)
 
     db.remove(id)
         .then(data => {
             if (data && data > 0) {
-                res.status(200).json({
-                    error: 'the user was deleted.',
-                });
+                res.status(200).json(deletedUser);
             } else {
                 res
                 .status(404)
